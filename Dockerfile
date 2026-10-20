@@ -1,7 +1,4 @@
-FROM eclipse-temurin:25-jdk-jammy
-
+FROM openjdk:25-oracle
 VOLUME /tmp
-
 COPY target/*.jar app.jar
-
 ENTRYPOINT ["java", "-jar", "/app.jar"]
