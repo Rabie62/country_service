@@ -1,5 +1,6 @@
 package com.countryservice.demo;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,115 +35,115 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ControllerMockMvcTests {
 
-	MockMvc mockMvc;
+    MockMvc mockMvc;
 
-	@Mock
-	CountryService countryService;
+    @Mock
+    CountryService countryService;
 
-	@InjectMocks
-	CountryController countryController;
+    @InjectMocks
+    CountryController countryController;
 
-	public List<Country> mycountries;
-	Country country;
+    public List<Country> mycountries;
+    Country country;
 
-	@BeforeEach
-	public void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(countryController).build();
-	}
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(countryController).build();
+    }
 
-	@Test
-	@Order(1)
-	public void test_getAllCountries() throws Exception {
-		mycountries = new ArrayList<Country>();
-		mycountries.add(new Country(1, "India", "Delhi"));
-		mycountries.add(new Country(2, "USA", "Washington"));
+    @Test
+    @Order(1)
+    public void test_getAllCountries() throws Exception {
+        mycountries = new ArrayList<Country>();
+        mycountries.add(new Country(1, "India", "Delhi"));
+        mycountries.add(new Country(2, "USA", "Washington"));
 
-		when(countryService.getAllCountries()).thenReturn(mycountries);
+        when(countryService.getAllCountries()).thenReturn(mycountries);
 
-		this.mockMvc.perform(get("/getcountries"))
-			.andExpect(status().isFound())
-			.andDo(print());
-	}
+        this.mockMvc.perform(get("/getcountries"))
+            .andExpect(status().isFound())
+            .andDo(print());
+    }
 
-	@Test
-	@Order(2)
-	public void test_getCountryByID() throws Exception {
-		country = new Country(1, "India", "Delhi");
-		int countryID = 1;
+    @Test
+    @Order(2)
+    public void test_getCountryByID() throws Exception {
+        country = new Country(1, "India", "Delhi");
+        int countryID = 1;
 
-		when(countryService.getCountryById(countryID)).thenReturn(country);
+        when(countryService.getCountryById(countryID)).thenReturn(country);
 
-		this.mockMvc.perform(get("/getcountries/{id}", countryID))
-			.andExpect(status().isFound())
-			.andExpect(MockMvcResultMatchers.jsonPath(".idCountry").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath(".name").value("India"))
-			.andExpect(MockMvcResultMatchers.jsonPath(".capital").value("Delhi"))
-			.andDo(print());
-	}
+        this.mockMvc.perform(get("/getcountries/{id}", countryID))
+            .andExpect(status().isFound())
+            .andExpect(MockMvcResultMatchers.jsonPath(".idCountry").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath(".name").value("India"))
+            .andExpect(MockMvcResultMatchers.jsonPath(".capital").value("Delhi"))
+            .andDo(print());
+    }
 
-	@Test
-	@Order(3)
-	public void test_getCountryByName() throws Exception {
-		country = new Country(1, "India", "Delhi");
-		String countryName = "India";
+    @Test
+    @Order(3)
+    public void test_getCountryByName() throws Exception {
+        country = new Country(1, "India", "Delhi");
+        String countryName = "India";
 
-		when(countryService.getCountryByName(countryName)).thenReturn(country);
+        when(countryService.getCountryByName(countryName)).thenReturn(country);
 
-		this.mockMvc.perform(get("/getcountries/countryname").param("name", "India"))
-			.andExpect(status().isFound())
-			.andExpect(MockMvcResultMatchers.jsonPath(".idCountry").value(1))
-			.andExpect(MockMvcResultMatchers.jsonPath(".name").value("India"))
-			.andExpect(MockMvcResultMatchers.jsonPath(".capital").value("Delhi"))
-			.andDo(print());
-	}
+        this.mockMvc.perform(get("/getcountries/countryname").param("name", countryName))
+            .andExpect(status().isFound())
+            .andExpect(MockMvcResultMatchers.jsonPath(".idCountry").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath(".name").value("India"))
+            .andExpect(MockMvcResultMatchers.jsonPath(".capital").value("Delhi"))
+            .andDo(print());
+    }
 
-	@Test
-	@Order(4)
-	public void test_addCountry() throws Exception {
-		country = new Country(3, "Germany", "Berlin");
+    @Test
+    @Order(4)
+    public void test_addCountry() throws Exception {
+        country = new Country(3, "Germany", "Berlin");
 
-		when(countryService.addCountry(country)).thenReturn(country);
+        when(countryService.addCountry(any(Country.class))).thenReturn(country);
 
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonbody = mapper.writeValueAsString(country);
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonbody = mapper.writeValueAsString(country);
 
-		this.mockMvc.perform(post("/addcountry")
-				.content(jsonbody)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated())
-			.andDo(print());
-	}
+        this.mockMvc.perform(post("/addcountry")
+                .content(jsonbody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andDo(print());
+    }
 
-	@Test
-	@Order(5)
-	public void test_updateCountry() throws Exception {
-		country = new Country(3, "Japan", "Tokyo");
-		int countryID = 3;
+    @Test
+    @Order(5)
+    public void test_updateCountry() throws Exception {
+        country = new Country(3, "Japan", "Tokyo");
+        int countryID = 3;
 
-		when(countryService.getCountryById(countryID)).thenReturn(country);
-		when(countryService.updateCountry(country)).thenReturn(country);
+        when(countryService.getCountryById(countryID)).thenReturn(country);
+        when(countryService.updateCountry(any(Country.class))).thenReturn(country);
 
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonbody = mapper.writeValueAsString(country);
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonbody = mapper.writeValueAsString(country);
 
-		this.mockMvc.perform(put("/updatecountry/{id}", countryID)
-				.content(jsonbody)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andExpect(MockMvcResultMatchers.jsonPath(".name").value("Japan"))
-			.andExpect(MockMvcResultMatchers.jsonPath(".capital").value("Tokyo"))
-			.andDo(print());
-	}
+        this.mockMvc.perform(put("/updatecountry/{id}", countryID)
+                .content(jsonbody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath(".name").value("Japan"))
+            .andExpect(MockMvcResultMatchers.jsonPath(".capital").value("Tokyo"))
+            .andDo(print());
+    }
 
-	@Test
-	@Order(6)
-	public void test_deleteCountry() throws Exception {
-		country = new Country(3, "Japan", "Tokyo");
-		int countryID = 3;
+    @Test
+    @Order(6)
+    public void test_deleteCountry() throws Exception {
+        country = new Country(3, "Japan", "Tokyo");
+        int countryID = 3;
 
-		when(countryService.getCountryById(countryID)).thenReturn(country);
+        when(countryService.getCountryById(countryID)).thenReturn(country);
 
-		this.mockMvc.perform(delete("/deletecountry/{id}", countryID))
-			.andExpect(status().isOk());
-	}
+        this.mockMvc.perform(delete("/deletecountry/{id}", countryID))
+            .andExpect(status().isOk());
+    }
 }
