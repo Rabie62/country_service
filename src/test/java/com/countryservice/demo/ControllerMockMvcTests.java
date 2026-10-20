@@ -44,7 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ComponentScan(basePackages = "com.countryservice.demo")
 @AutoConfigureMockMvc
 @ContextConfiguration
-//@WebMvcTest(ControllerMockMvcTests.class)
+@WebMvcTest(ControllerMockMvcTests.class)
 public class ControllerMockMvcTests {
 	
 	@Autowired
