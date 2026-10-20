@@ -29,7 +29,7 @@ pipeline {
                     sh 'docker login -u rabie62 -p ${dockerhubpwd}'
                 }
 
-                sh 'docker tag my-country-service:$BUILD_NUMBER jamina2385/my-country-service:$BUILD_NUMBER'
+                sh 'docker tag my-country-service:$BUILD_NUMBER rabie62/my-country-service:$BUILD_NUMBER'
                 sh 'docker push rabie62/my-country-service:$BUILD_NUMBER'
             }
         }
