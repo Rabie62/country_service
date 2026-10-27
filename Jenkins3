@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M2_HOME'
+    }
+
+    stages {
+
+        stage('Checkout code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Rabie62/country_service.git'
+            }
+        }
+
+        stage('Build maven') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Build Dockerfile')
+        {
+            steps {
+                sh 'docker build . -t my-country-service:$BUILD_NUMBER'
+
+                withCredentials([string(credentialsId: 'dockerhub-pwd',
+                                        variable: 'dockerhubpwd')]) {
+                    sh 'docker login -u rabie62 -p ${dockerhubpwd}'
+                }
+
+                sh 'docker tag my-country-service:$BUILD_NUMBER rabie62/my-country-service:$BUILD_NUMBER'
+                sh 'docker push rabie62/my-country-service:$BUILD_NUMBER'
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    kubeconfig(credentialsId: 'kubeconfig-file', serverUrl: '') {
+                        sh 'kubectl apply -f deployment.yaml'
+                        sh 'kubectl apply -f service.yaml'
+                    }
+                }
+            }
+        }
+    }
+}
