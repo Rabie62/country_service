@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M2_HOME'
+    }
+
+    stages {
+        stage('Checkout code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Rabie62/country_service.git'
+            }
+        }
+
+        stage('Build maven') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Deploy using Ansible playbook') {
+            steps {
+                script {
+                    sh 'ansible-playbook -i localhost, playbookCICD.yml'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Ansible playbook executed successfully!'
+        }
+        failure {
+            echo 'Ansible playbook execution failed!'
+        }
+    }
+}
