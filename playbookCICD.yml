@@ -7,6 +7,7 @@
     - vault.yml
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3
     image_name: my-country-service
     image_tag: v1
     dockerfile_path: './'
