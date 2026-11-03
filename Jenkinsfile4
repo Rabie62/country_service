@@ -26,6 +26,7 @@ pipeline {
                         ansible-playbook -i localhost, playbookCICD.yml --vault-password-file .vault_pass
                         rm -f .vault_pass
                     '''
+                }
             }
         }
     }
