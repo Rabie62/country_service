@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: country-service-container
-          image: rabie62/my-country-service:latest
+          image: rabie62/my-country-service:v2
           ports:
             - containerPort: 8082
