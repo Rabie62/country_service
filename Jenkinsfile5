@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'M2_HOME'
+        jdk 'JDK25'
+    }
+
+    stages {
+        stage('Checkout code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Rabie62/country_service.git'
+            }
+        }
+
+        stage('Build & Test (Maven & JUnit)') {
+            steps {
+                sh 'mvn clean package jacoco:report'
+            }
+            post {
+                success {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv(installationName: 'MySonarQubeServer', credentialsId: 'sonarqubePWD') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=country-service'
+                }
+            }
+        }
+
+        stage('Continuous Delivery (Ansible -> Docker Hub -> Kubernetes)') {
+            steps {
+                withCredentials([string(credentialsId: 'ansible-vault-password', variable: 'VAULT_PASS')]) {
+                    sh '''
+                        echo "$VAULT_PASS" > .vault_pass
+                        ansible-playbook -i localhost, playbookCICD.yml --vault-password-file .vault_pass
+                        rm -f .vault_pass
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'rm -f .vault_pass'
+            cleanWs()
+        }
+        success {
+            echo 'CI/CD Pipeline executed successfully! Microservice deployed to Kubernetes.'
+        }
+        failure {
+            echo 'CI/CD Pipeline failed!'
+        }
+    }
+}
